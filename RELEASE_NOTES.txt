@@ -1,0 +1,1 @@
+First release: output volume and mute, volume keys, Speaker B / Dim / Mono, input 48V / Inst / Comp / EQ, Levels window.
