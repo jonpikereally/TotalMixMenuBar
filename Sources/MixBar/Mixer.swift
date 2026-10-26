@@ -281,8 +281,47 @@ final class Mixer: ObservableObject {
         send("/input/\(index)/mute", on ? 1 : 0)
     }
 
+    /// Input pairs that can be stereo linked: an odd/even pair (Analog 1+2,
+    /// 3+4 …) whose channels TotalMix shows, by left index.
+    func stereoPairs() -> [(left: Channel, right: Channel)] {
+        inputs.keys.sorted().compactMap { i in
+            guard i % 2 == 0, let l = inputs[i], let r = inputs[i + 1], !l.hidden, l.stereo || !r.hidden else { return nil }
+            return (l, r)
+        }
+    }
+
+    /// Why linking a pair is refused, or nil when it's fine. Linking copies the
+    /// left input's settings, 48V included, onto the right one (seen live on a
+    /// UCX II), so it must never carry 48V onto an input locked in Settings.
+    func stereoLinkBlocked(left index: Int) -> String? {
+        guard let l = inputs[index], let r = inputs[index + 1] else { return "TotalMix hasn't reported both channels yet." }
+        let locked = Prefs.shared.phantomLocked
+        if l.phantom != r.phantom && (locked.contains(index) || locked.contains(index + 1)) {
+            return "48V is on for one of these inputs and locked for the other. Switch 48V off first."
+        }
+        return nil
+    }
+
+    func setStereo(input index: Int, _ on: Bool) {
+        guard index % 2 == 0 else { return }
+        if on && stereoLinkBlocked(left: index) != nil { return }
+        inputs[index]?.stereo = on
+        send("/input/\(index)/stereo", on ? 1 : 0)
+        // TotalMix renames the pair ("Analog 1/2") and changes its routing;
+        // fetch the new state once it has settled.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in self?.requestAll() }
+    }
+
+    /// 48V is locked for an input, or for its partner when the two are linked
+    /// (they then share one switch).
+    func phantomLocked(input index: Int) -> Bool {
+        let locked = Prefs.shared.phantomLocked
+        if locked.contains(index) { return true }
+        return inputs[index]?.stereo == true && locked.contains(index + 1)
+    }
+
     func setPhantom(input index: Int, _ on: Bool) {
-        if on && Prefs.shared.phantomLocked.contains(index) { return }
+        if on && phantomLocked(input: index) { return }
         inputs[index]?.phantom = on
         send("/input/\(index)/48v", on ? 1 : 0)
     }

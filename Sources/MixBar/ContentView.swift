@@ -171,9 +171,13 @@ struct InputColumn: View {
     @ObservedObject var prefs = Prefs.shared
 
     var body: some View {
-        let locked = prefs.phantomLocked.contains(ch.index)
+        let locked = prefs.phantomLocked.isEmpty ? false : mixer.phantomLocked(input: ch.index)
         VStack(spacing: 6) {
-            Text(ch.displayName).font(.system(size: 10, weight: .semibold)).lineLimit(1).truncationMode(.middle)
+            HStack(spacing: 3) {
+                if ch.stereo { Image(systemName: "link").font(.system(size: 8)).foregroundStyle(.secondary) }
+                Text(ch.displayName).font(.system(size: 10, weight: .semibold)).lineLimit(1).truncationMode(.middle)
+            }
+            .help(ch.stereo ? "Stereo pair — right-click to unlink" : "Right-click to link as a stereo pair")
             // A locked input can still have 48V switched off if TotalMix has it on.
             IconToggle(symbol: locked ? "bolt.slash.fill" : "bolt.fill", on: ch.phantom, tint: Theme.red,
                        enabled: ch.hasPhantom && (!locked || ch.phantom),
@@ -189,6 +193,26 @@ struct InputColumn: View {
         .padding(6)
         .background(RoundedRectangle(cornerRadius: 8).fill(Color.white.opacity(0.04)))
         .overlay(RoundedRectangle(cornerRadius: 8).stroke(Theme.stroke))
+        .contextMenu { stereoMenu }
+    }
+
+    /// Link or unlink this input with its odd/even partner (1+2, 3+4 …).
+    @ViewBuilder private var stereoMenu: some View {
+        let left = ch.index - ch.index % 2
+        if ch.stereo {
+            Button("Unlink Stereo Pair") { mixer.setStereo(input: left, false) }
+        } else if let partner = mixer.input(ch.index % 2 == 0 ? ch.index + 1 : ch.index - 1), !partner.hidden {
+            let l = mixer.input(left)?.displayName ?? ""
+            let r = mixer.input(left + 1)?.displayName ?? ""
+            if let reason = mixer.stereoLinkBlocked(left: left) {
+                Button("Link \(l) + \(r) as Stereo") {}.disabled(true)
+                Text(reason)
+            } else {
+                Button("Link \(l) + \(r) as Stereo") { mixer.setStereo(input: left, true) }
+            }
+        } else {
+            Text("No partner channel to link with")
+        }
     }
 }
 

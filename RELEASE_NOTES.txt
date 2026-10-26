@@ -1,1 +1,1 @@
-48V lock: in Settings → 48V phantom power, untick an input so MixBar never switches its 48V on (for ribbon mics or line gear). You can still switch it off if TotalMix already has it on.
+Stereo linking: link two inputs into a stereo pair from Settings → Stereo pairs, or right-click an input in the menu. Note that TotalMix copies the left input's settings (routing, Comp, EQ, 48V) onto the right when linking. Linking is refused if it would carry 48V onto an input you've locked.

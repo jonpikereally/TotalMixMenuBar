@@ -15,6 +15,9 @@ supports.
 - **Control Room:** Speaker B, Dim, Mono.
 - **Inputs:** 48V, Instrument, Comp and EQ for chosen inputs (by default the
   ones with preamp switches).
+- **Stereo pairs:** link or unlink input pairs (1+2, 3+4 …) in Settings or by
+  right-clicking an input. TotalMix copies the left input's settings onto the
+  right when linking.
 - **48V lock:** untick an input in Settings and MixBar will never switch its
   48V on (it can still switch it off).
 - **Levels window:** an always-on-top input meter strip with peak hold; a

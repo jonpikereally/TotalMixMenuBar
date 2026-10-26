@@ -62,4 +62,20 @@ spin(0.5)
 check(mixer.input(1)?.phantom == false, "locked input refuses 48V on")
 prefs.phantomLocked = []
 
+// Stereo linking.
+check(mixer.stereoPairs().map(\.left.index) == [0], "Mic 1 + Mic 2 is a linkable pair, Line 3 has no partner")
+mixer.setStereo(input: 0, true)
+spin(1.2)
+check(mixer.input(0)?.stereo == true && mixer.visible(.input).map(\.index) == [0, 2], "linking folds Mic 2 into Mic 1")
+mixer.setStereo(input: 0, false)
+spin(1.2)
+check(mixer.input(0)?.stereo == false && mixer.visible(.input).map(\.index) == [0, 1, 2], "unlinking brings Mic 2 back")
+// Mic 1 has 48V on; lock Mic 2: linking would carry 48V onto it.
+mixer.setPhantom(input: 0, true)
+prefs.phantomLocked = [1]
+check(mixer.stereoLinkBlocked(left: 0) != nil, "linking refused when it would carry 48V onto a locked input")
+mixer.setStereo(input: 0, true)
+check(mixer.input(0)?.stereo == false, "blocked link isn't sent")
+prefs.phantomLocked = []
+
 if failures == 0 { print("All tests passed") } else { print("\(failures) failed"); exit(1) }

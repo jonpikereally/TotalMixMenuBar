@@ -42,4 +42,6 @@ while time.time() < end:
     if a == '/sendall':
         s.sendto(bundle([msg(k, v) for k, v in STATE]), dest)
     elif a != '/sendstate':
+        v = struct.unpack('>f', d[-4:])[0]
+        STATE = [(k, x) for k, x in STATE if k != a] + [(a, v)]
         s.sendto(d, dest)  # echo like "Re-send received"

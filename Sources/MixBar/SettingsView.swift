@@ -74,6 +74,27 @@ struct SettingsView: View {
                 }
             }
 
+            Section("Stereo pairs") {
+                Text("Link two inputs into one stereo channel, the same as the stereo button in TotalMix. When linking, TotalMix copies the left input's settings (routing, Comp, EQ, 48V) onto the right one, and unlinking doesn't undo that. You can also right-click an input in the menu.")
+                    .font(.caption).foregroundStyle(.secondary)
+                let pairs = mixer.stereoPairs()
+                if pairs.isEmpty {
+                    Text(mixer.link == .connected ? "TotalMix reports no inputs that can be paired." : "Connect to TotalMix to see its inputs.")
+                        .font(.callout).foregroundStyle(.secondary)
+                }
+                ForEach(pairs, id: \.left.index) { pair in
+                    let blocked = pair.left.stereo ? nil : mixer.stereoLinkBlocked(left: pair.left.index)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Toggle(pair.left.stereo ? "\(pair.left.displayName) (inputs \(pair.left.index + 1)+\(pair.left.index + 2))"
+                                                : "\(pair.left.displayName) + \(pair.right.displayName)",
+                               isOn: Binding(get: { pair.left.stereo },
+                                             set: { mixer.setStereo(input: pair.left.index, $0) }))
+                            .disabled(blocked != nil)
+                        if let blocked { Text(blocked).font(.caption).foregroundStyle(Theme.red) }
+                    }
+                }
+            }
+
             Section("48V phantom power") {
                 Text("Untick an input to stop MixBar ever switching its 48V on, e.g. for a ribbon mic or line-level gear. Its 48V button shows a crossed-out bolt. If 48V is already on in TotalMix, you can still switch it off.")
                     .font(.caption).foregroundStyle(.secondary)
