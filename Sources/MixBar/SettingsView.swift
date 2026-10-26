@@ -72,6 +72,9 @@ struct SettingsView: View {
                         Toggle(ch.displayName, isOn: binding(for: ch.index, in: \.shownInputs))
                     }
                 }
+                Toggle("Show gain knobs on inputs", isOn: $prefs.showGain)
+                Text("Drag a knob up or down to change the input's gain in TotalMix; hold ⌥ for fine steps.")
+                    .font(.caption).foregroundStyle(.secondary)
             }
 
             Section("Stereo pairs") {

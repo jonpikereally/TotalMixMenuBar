@@ -1,1 +1,1 @@
-Stereo linking: link two inputs into a stereo pair from Settings → Stereo pairs, or right-click an input in the menu. Note that TotalMix copies the left input's settings (routing, Comp, EQ, 48V) onto the right when linking. Linking is refused if it would carry 48V onto an input you've locked.
+Gain knobs: turn on "Show gain knobs on inputs" in Settings to get a gain knob on each input in the menu. Drag up or down to change the gain (hold Option for fine steps). On a Fireface UCX II, mic inputs go 0 to +75 dB and line inputs 0 to +24 dB.

@@ -7,7 +7,7 @@ CACHE="${TMPDIR:-/tmp}/mixbar-modcache"
 mkdir -p "$CACHE"
 [[ -f Sources/MixBar/Version.swift ]] || ./build.sh >/dev/null
 swiftc -module-cache-path "$CACHE" -o "$CACHE/mixbar-tests" \
-  Tests/main.swift Sources/MixBar/{OSC,Mixer,Prefs,Errors,Version}.swift
+  Tests/main.swift Sources/MixBar/{OSC,Mixer,Prefs,Errors,Version,GainRanges}.swift
 LOG="$CACHE/fake-totalmix.log"
 if [[ "$1" == "--snapshot" ]]; then
   swiftc -module-cache-path "$CACHE" -o "$CACHE/mixbar-snapshot" \

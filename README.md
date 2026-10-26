@@ -15,6 +15,8 @@ supports.
 - **Control Room:** Speaker B, Dim, Mono.
 - **Inputs:** 48V, Instrument, Comp and EQ for chosen inputs (by default the
   ones with preamp switches).
+- **Gain knobs (optional):** turn on in Settings for a gain knob on each input;
+  drag up/down, ⌥ for fine steps. Ranges per interface are in `GainRanges.swift`.
 - **Stereo pairs:** link or unlink input pairs (1+2, 3+4 …) in Settings or by
   right-clicking an input. TotalMix copies the left input's settings onto the
   right when linking.
@@ -69,11 +71,12 @@ and launches it. Grant Accessibility when asked.
 | `Prefs.swift` | Settings and which channels the menu shows |
 | `MediaKeys.swift` | Event tap for the volume keys; CoreAudio check for the RME being the sound output |
 | `ContentView.swift` | The popover |
+| `GainRanges.swift` | Input gain range and step per RME interface |
 | `LevelsWindow.swift`, `HUD.swift`, `SettingsView.swift` | Levels window, volume overlay, settings |
 | `Updater.swift`, `Errors.swift` | Self-updater and coded errors (same pattern as PasteStack) |
 
 Global OSC addresses used: `/output/N/volume` (dB), `/output/N/mute`,
 `/{input,output}/N/{name,color,stereo,dynamics/enable,eq/enable}`,
-`/input/N/{48v,instrument}`, `/controlroom/{dim,mainmono,speakerb}`,
+`/input/N/{48v,instrument,gain}`, `/controlroom/{dim,mainmono,speakerb}`,
 `/level/in/N`, `/status/device`, and `/sendall` / `/sendstate` to request state.
 Channel indexes are zero-based; a stereo pair is addressed by its left channel.

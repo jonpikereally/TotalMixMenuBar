@@ -78,4 +78,17 @@ mixer.setStereo(input: 0, true)
 check(mixer.input(0)?.stereo == false, "blocked link isn't sent")
 prefs.phantomLocked = []
 
+// Gain.
+check(mixer.input(0)?.gain == 65, "reads input gain")
+let mic = GainRanges.range(device: mixer.device, input: mixer.input(0)!)
+let line = GainRanges.range(device: mixer.device, input: mixer.input(2)!)
+check(mic == GainRange(min: 0, max: 75, step: 1), "UCX II mic gain is 0 to 75 dB")
+check(line == GainRange(min: 0, max: 24, step: 0.5), "UCX II line gain is 0 to 24 dB in half steps")
+check(GainRanges.range(device: "Fireface UCX (123)", input: mixer.input(0)!)?.max == 65, "UCX (not II) mic gain tops out at 65 dB")
+check(mixer.setGain(input: 2, db: 30) == 24, "gain clamps to the range")
+check(mixer.setGain(input: 2, db: 3.3) == 3.5, "gain snaps to the step")
+check(mixer.setGain(input: 3, db: 5) == nil, "no gain on an input that doesn't report one")
+spin(0.5)
+check(mixer.input(2)?.gain == 3.5, "gain change survives the echo")
+
 if failures == 0 { print("All tests passed") } else { print("\(failures) failed"); exit(1) }

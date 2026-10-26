@@ -178,6 +178,14 @@ struct InputColumn: View {
                 Text(ch.displayName).font(.system(size: 10, weight: .semibold)).lineLimit(1).truncationMode(.middle)
             }
             .help(ch.stereo ? "Stereo pair — right-click to unlink" : "Right-click to link as a stereo pair")
+            if prefs.showGain {
+                if let range = GainRanges.range(device: mixer.device, input: ch) {
+                    GainKnob(db: ch.gain, range: range) { mixer.setGain(input: ch.index, db: $0) }
+                } else {
+                    // Keeps the columns lined up when some inputs have no gain.
+                    Text("No gain").font(.system(size: 8)).foregroundStyle(.tertiary).frame(height: 44)
+                }
+            }
             // A locked input can still have 48V switched off if TotalMix has it on.
             IconToggle(symbol: locked ? "bolt.slash.fill" : "bolt.fill", on: ch.phantom, tint: Theme.red,
                        enabled: ch.hasPhantom && (!locked || ch.phantom),
@@ -298,6 +306,68 @@ struct MiniToggle: View {
         }
         .buttonStyle(.plain)
         .help("\(title) on this output")
+    }
+}
+
+/// A rotary gain knob: drag up/down (⌥ for fine steps). The arc runs
+/// clockwise from 7 o'clock to 5 o'clock, like a hardware pot.
+struct GainKnob: View {
+    let db: Double
+    let range: GainRange
+    let onChange: (Double) -> Void
+    @State private var dragStart: Double?
+    @State private var dragging: Double?
+    @State private var lastSent = Date.distantPast
+
+    private let sweep = 300.0   // degrees
+
+    var body: some View {
+        let value = dragging ?? db
+        let f = (value - range.min) / max(range.max - range.min, 0.001)
+        VStack(spacing: 1) {
+            ZStack {
+                Circle().trim(from: 0, to: sweep / 360)
+                    .stroke(Color.white.opacity(0.14), style: StrokeStyle(lineWidth: 3, lineCap: .round))
+                    .rotationEffect(.degrees(90 + (360 - sweep) / 2))
+                Circle().trim(from: 0, to: max(0.001, min(1, f)) * sweep / 360)
+                    .stroke(Theme.blue, style: StrokeStyle(lineWidth: 3, lineCap: .round))
+                    .rotationEffect(.degrees(90 + (360 - sweep) / 2))
+                Circle().fill(Color(white: 0.28)).padding(5)
+                Capsule().fill(Color.white.opacity(0.85)).frame(width: 2, height: 7)
+                    .offset(y: -6)
+                    .rotationEffect(.degrees(-sweep / 2 + min(1, max(0, f)) * sweep))
+            }
+            .frame(width: 30, height: 30)
+            Text(Self.format(value)).font(.system(size: 9, weight: .medium).monospacedDigit())
+                .foregroundStyle(.secondary)
+        }
+        .frame(height: 44)
+        .contentShape(Rectangle())
+        .gesture(DragGesture(minimumDistance: 1)
+            .onChanged { v in
+                let start = dragStart ?? db
+                if dragStart == nil { dragStart = db }
+                // A full sweep over about 150 points; ⌥ makes it four times finer.
+                let fine = NSEvent.modifierFlags.contains(.option) ? 0.25 : 1
+                let next = range.clamp(start - v.translation.height / 150 * (range.max - range.min) * fine)
+                guard next != dragging else { return }
+                dragging = next
+                if Date().timeIntervalSince(lastSent) > 0.033 {
+                    lastSent = Date()
+                    onChange(next)
+                }
+            }
+            .onEnded { _ in
+                if let d = dragging { onChange(d) }
+                dragging = nil
+                dragStart = nil
+            })
+        .help("Gain \(Self.format(value)) (\(Self.format(range.min)) to \(Self.format(range.max))) — drag up or down, ⌥ for fine steps")
+    }
+
+    static func format(_ db: Double) -> String {
+        let s = db == db.rounded() ? String(format: "%.0f", db) : String(format: "%.1f", db)
+        return (db > 0 ? "+" : "") + s.replacingOccurrences(of: "-", with: "−") + " dB"
     }
 }
 

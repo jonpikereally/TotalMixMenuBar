@@ -28,6 +28,9 @@ MainActor.assumeIsolated {
     prefs.phantomLocked = [0, 1]
     render(ContentView(actions: MenuActions()), "popover-locked.png")
     prefs.phantomLocked = []
+    prefs.showGain = true
+    render(ContentView(actions: MenuActions()), "popover-gain.png")
+    prefs.showGain = false
     AppStatus.shared.banner = .init(error: AppError(.legacyMode), action: nil)
     render(ContentView(actions: MenuActions()).environmentObject(Mixer.shared), "popover-banner.png")
 }

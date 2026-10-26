@@ -38,13 +38,14 @@ final class Prefs: ObservableObject {
 
     @Published var monoShortcut: Bool { didSet { d.set(monoShortcut, forKey: "monoShortcut") } }
     @Published var levelsWindow: Bool { didSet { d.set(levelsWindow, forKey: "levelsWindow") } }
+    @Published var showGain: Bool { didSet { d.set(showGain, forKey: "showGain") } }
 
     private init() {
         d.register(defaults: [
             "host": "127.0.0.1", "sendPort": 7001, "listenPort": 9001,
             "volumeKeys": true, "keyOutput": -1, "stepDb": 2.0, "maxDb": 0.0,
             "onlyWhenRMEIsOutput": true, "muteKey": "dim", "showHUD": true,
-            "monoShortcut": true, "levelsWindow": false,
+            "monoShortcut": true, "levelsWindow": false, "showGain": false,
         ])
         host = d.string(forKey: "host") ?? "127.0.0.1"
         sendPort = d.integer(forKey: "sendPort")
@@ -62,6 +63,7 @@ final class Prefs: ObservableObject {
         showHUD = d.bool(forKey: "showHUD")
         monoShortcut = d.bool(forKey: "monoShortcut")
         levelsWindow = d.bool(forKey: "levelsWindow")
+        showGain = d.bool(forKey: "showGain")
     }
 
     func label(for ch: Channel) -> String {

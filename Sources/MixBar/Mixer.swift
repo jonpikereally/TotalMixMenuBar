@@ -28,6 +28,7 @@ struct Channel: Identifiable, Equatable {
     var instrument = false
     var dynamics = false
     var eq = false
+    var gain: Double = 0         // dB, inputs with a preamp or line trim
     /// Which paths TotalMix has reported, so buttons for options a channel
     /// doesn't have (48V on a line input, say) can be greyed out.
     var paths: Set<String> = []
@@ -207,6 +208,7 @@ final class Mixer: ObservableObject {
             case "mute": ch.mute = on
             case "volume": if let v = m.number { ch.volume = v }
             case "faderlin": if let v = m.number, !ch.paths.contains("volume") { ch.volume = FaderCurve.db(fromLinear: v) }
+            case "gain": if let v = m.number { ch.gain = v }
             case "48v": ch.phantom = on
             case "instrument": ch.instrument = on
             case "dynamics/enable": ch.dynamics = on
@@ -324,6 +326,17 @@ final class Mixer: ObservableObject {
         if on && phantomLocked(input: index) { return }
         inputs[index]?.phantom = on
         send("/input/\(index)/48v", on ? 1 : 0)
+    }
+
+    /// Sets input gain, snapped to the interface's step and range. Returns
+    /// the value sent, or nil when the input has no adjustable gain.
+    @discardableResult
+    func setGain(input index: Int, db: Double) -> Double? {
+        guard let ch = inputs[index], let range = GainRanges.range(device: device, input: ch) else { return nil }
+        let value = range.clamp(db)
+        inputs[index]?.gain = value
+        send("/input/\(index)/gain", Float(value))
+        return value
     }
 
     func setInstrument(input index: Int, _ on: Bool) {

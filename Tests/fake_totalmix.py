@@ -20,9 +20,9 @@ STATE = [
     ('/output/6/volume', -10.4), ('/output/6/mute', 0.0),
     ('/output/12/name', 'ADAT 1/2'), ('/output/12/color', 0.0), ('/output/12/stereo', 1.0),
     ('/input/0/name', 'Mic 1'), ('/input/0/color', 1.0), ('/input/0/48v', 1.0), ('/input/0/instrument', 0.0),
-    ('/input/0/dynamics/enable', 1.0), ('/input/0/eq/enable', 0.0),
+    ('/input/0/dynamics/enable', 1.0), ('/input/0/gain', 65.0), ('/input/0/eq/enable', 0.0),
     ('/input/1/name', 'Mic 2'), ('/input/1/color', 1.0), ('/input/1/48v', 0.0), ('/input/1/instrument', 1.0),
-    ('/input/2/name', 'Line 3'), ('/input/2/color', 1.0),
+    ('/input/2/name', 'Line 3'), ('/input/2/color', 1.0), ('/input/2/gain', 0.0),
     ('/controlroom/dim', 0.0), ('/controlroom/mainmono', 1.0), ('/controlroom/speakerb', 0.0),
     ('/level/in/0', -12.5),
 ]
