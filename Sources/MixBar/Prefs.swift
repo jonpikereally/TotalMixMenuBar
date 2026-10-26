@@ -21,6 +21,9 @@ final class Prefs: ObservableObject {
     @Published var shownOutputs: [Int] { didSet { d.set(shownOutputs, forKey: "shownOutputs") } }
     @Published var shownInputs: [Int] { didSet { d.set(shownInputs, forKey: "shownInputs") } }
     @Published var outputLabels: [String: String] { didSet { d.set(outputLabels, forKey: "outputLabels") } }
+    /// Inputs whose 48V MixBar will never switch on (ribbon mics, line gear).
+    /// Switching it off is still allowed, in case TotalMix already has it on.
+    @Published var phantomLocked: [Int] { didSet { d.set(phantomLocked, forKey: "phantomLocked") } }
 
     // Volume keys
     @Published var volumeKeys: Bool { didSet { d.set(volumeKeys, forKey: "volumeKeys") } }
@@ -49,6 +52,7 @@ final class Prefs: ObservableObject {
         shownOutputs = d.array(forKey: "shownOutputs") as? [Int] ?? []
         shownInputs = d.array(forKey: "shownInputs") as? [Int] ?? []
         outputLabels = d.dictionary(forKey: "outputLabels") as? [String: String] ?? [:]
+        phantomLocked = d.array(forKey: "phantomLocked") as? [Int] ?? []
         volumeKeys = d.bool(forKey: "volumeKeys")
         keyOutput = d.integer(forKey: "keyOutput")
         stepDb = d.double(forKey: "stepDb")

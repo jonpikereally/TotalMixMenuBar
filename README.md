@@ -15,6 +15,8 @@ supports.
 - **Control Room:** Speaker B, Dim, Mono.
 - **Inputs:** 48V, Instrument, Comp and EQ for chosen inputs (by default the
   ones with preamp switches).
+- **48V lock:** untick an input in Settings and MixBar will never switch its
+  48V on (it can still switch it off).
 - **Levels window:** an always-on-top input meter strip with peak hold; a
   channel name turns red on clipping until you click it.
 - Updates itself from this repo, and every error has a code (see

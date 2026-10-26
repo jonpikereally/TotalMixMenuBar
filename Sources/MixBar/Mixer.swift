@@ -282,6 +282,7 @@ final class Mixer: ObservableObject {
     }
 
     func setPhantom(input index: Int, _ on: Bool) {
+        if on && Prefs.shared.phantomLocked.contains(index) { return }
         inputs[index]?.phantom = on
         send("/input/\(index)/48v", on ? 1 : 0)
     }

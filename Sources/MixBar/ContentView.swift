@@ -168,12 +168,19 @@ struct OutputRow: View {
 struct InputColumn: View {
     let ch: Channel
     @ObservedObject var mixer = Mixer.shared
+    @ObservedObject var prefs = Prefs.shared
 
     var body: some View {
+        let locked = prefs.phantomLocked.contains(ch.index)
         VStack(spacing: 6) {
             Text(ch.displayName).font(.system(size: 10, weight: .semibold)).lineLimit(1).truncationMode(.middle)
-            IconToggle(symbol: "bolt.fill", on: ch.phantom, tint: Theme.red, enabled: ch.hasPhantom,
-                       help: "48V phantom power") { mixer.setPhantom(input: ch.index, !ch.phantom) }
+            // A locked input can still have 48V switched off if TotalMix has it on.
+            IconToggle(symbol: locked ? "bolt.slash.fill" : "bolt.fill", on: ch.phantom, tint: Theme.red,
+                       enabled: ch.hasPhantom && (!locked || ch.phantom),
+                       help: locked ? "48V is turned off for this input in Settings" : "48V phantom power",
+                       disabledHelp: locked ? "48V is turned off for this input in Settings" : nil) {
+                mixer.setPhantom(input: ch.index, !ch.phantom)
+            }
             IconToggle(symbol: "guitars.fill", on: ch.instrument, tint: Theme.amber, enabled: ch.hasInstrument,
                        help: "Instrument (Hi-Z) input") { mixer.setInstrument(input: ch.index, !ch.instrument) }
             TextToggle(title: "Comp", on: ch.dynamics, tint: Theme.green) { mixer.setDynamics(.input, ch.index, !ch.dynamics) }
@@ -217,6 +224,7 @@ struct IconToggle: View {
     let tint: Color
     let enabled: Bool
     let help: String
+    var disabledHelp: String? = nil
     let action: () -> Void
 
     var body: some View {
@@ -231,7 +239,7 @@ struct IconToggle: View {
         .buttonStyle(.plain)
         .disabled(!enabled)
         .opacity(enabled ? 1 : 0.3)
-        .help(enabled ? help : "\(help) — not available on this input")
+        .help(enabled ? help : disabledHelp ?? "\(help) — not available on this input")
     }
 }
 

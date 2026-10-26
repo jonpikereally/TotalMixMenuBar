@@ -52,4 +52,14 @@ mixer.setDim(true)
 spin(1)
 check(mixer.input(1)?.phantom == true && mixer.dim, "local changes survive the echo")
 
+// 48V lock: never switches on, still switches off.
+prefs.phantomLocked = [1]
+mixer.setPhantom(input: 1, false)
+spin(0.5)
+check(mixer.input(1)?.phantom == false, "locked input can still turn 48V off")
+mixer.setPhantom(input: 1, true)
+spin(0.5)
+check(mixer.input(1)?.phantom == false, "locked input refuses 48V on")
+prefs.phantomLocked = []
+
 if failures == 0 { print("All tests passed") } else { print("\(failures) failed"); exit(1) }

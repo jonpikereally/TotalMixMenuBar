@@ -1,1 +1,1 @@
-{"version": "1.0", "url": "MixBar.zip", "notes": "First release: output volume and mute, volume keys, Speaker B / Dim / Mono, input 48V / Inst / Comp / EQ, Levels window."}
+{"version": "1.1", "url": "MixBar.zip", "notes": "48V lock: in Settings \u2192 48V phantom power, untick an input so MixBar never switches its 48V on (for ribbon mics or line gear). You can still switch it off if TotalMix already has it on."}

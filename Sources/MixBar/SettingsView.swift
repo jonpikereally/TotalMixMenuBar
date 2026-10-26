@@ -74,6 +74,24 @@ struct SettingsView: View {
                 }
             }
 
+            Section("48V phantom power") {
+                Text("Untick an input to stop MixBar ever switching its 48V on, e.g. for a ribbon mic or line-level gear. Its 48V button shows a crossed-out bolt. If 48V is already on in TotalMix, you can still switch it off.")
+                    .font(.caption).foregroundStyle(.secondary)
+                let preamps = mixer.visible(.input).filter(\.hasPhantom)
+                if preamps.isEmpty {
+                    Text(mixer.link == .connected ? "TotalMix reports no inputs with 48V." : "Connect to TotalMix to see its inputs.")
+                        .font(.callout).foregroundStyle(.secondary)
+                }
+                ForEach(preamps) { ch in
+                    HStack {
+                        Toggle("Allow 48V on \(ch.displayName)", isOn: allowPhantomBinding(ch.index))
+                        if ch.phantom && prefs.phantomLocked.contains(ch.index) {
+                            Text("48V is on now").font(.caption).foregroundStyle(Theme.red)
+                        }
+                    }
+                }
+            }
+
             Section("Volume keys") {
                 Toggle("Volume keys control TotalMix", isOn: $prefs.volumeKeys)
                 if prefs.volumeKeys && !axTrusted {
@@ -169,6 +187,16 @@ struct SettingsView: View {
                 var list = prefs[keyPath: key].filter { $0 != index }
                 if on { list.append(index); list.sort() }
                 prefs[keyPath: key] = list
+            })
+    }
+
+    private func allowPhantomBinding(_ index: Int) -> Binding<Bool> {
+        Binding(
+            get: { !prefs.phantomLocked.contains(index) },
+            set: { allow in
+                var list = prefs.phantomLocked.filter { $0 != index }
+                if !allow { list.append(index); list.sort() }
+                prefs.phantomLocked = list
             })
     }
 
