@@ -18,6 +18,7 @@ enum ErrorCode: String, CaseIterable {
     case updateDamagedApp = "MB-110"
     case updateInstallerFailed = "MB-111"
     case updateSwapFailed = "MB-112"
+    case updateStale = "MB-113"
     // 2xx — talking to TotalMix
     case socketFailed = "MB-201"
     case portInUse = "MB-202"
@@ -48,6 +49,7 @@ enum ErrorCode: String, CaseIterable {
         case .updateDamagedApp: return "The downloaded update is damaged."
         case .updateInstallerFailed: return "Couldn't start installing the update."
         case .updateSwapFailed: return "Installing the update failed, so the previous version was kept."
+        case .updateStale: return "The download was an older version than the update announced, so nothing was installed."
         case .socketFailed: return "Couldn't open a network socket to talk to TotalMix."
         case .portInUse: return "MixBar's OSC listening port is already in use by another app."
         case .badHost: return "The TotalMix host address isn't a valid IP address."
@@ -71,6 +73,8 @@ enum ErrorCode: String, CaseIterable {
             return "Try again in a few minutes. If it keeps happening, download the latest version from GitHub."
         case .updateInfoMalformed, .updateUnpackFailed, .updateMissingApp, .updateWrongApp, .updateDamagedApp:
             return "The published update is broken. Download the latest version from GitHub instead."
+        case .updateStale:
+            return "GitHub was still serving a cached copy. Wait five minutes and choose Check for Updates again."
         case .updateInstallerFailed, .updateSwapFailed:
             return "Make sure MixBar is in ~/Applications and that the folder isn't locked, then try again."
         case .socketFailed:

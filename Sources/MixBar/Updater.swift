@@ -143,6 +143,11 @@ final class Updater {
                     throw AppError(.updateWrongApp,
                                    "bundle ID \(newBundle?.bundleIdentifier ?? "none"), expected \(Bundle.main.bundleIdentifier ?? "?")")
                 }
+                // A cached older zip must not pass for the new version.
+                let gotVersion = newBundle?.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
+                guard gotVersion == manifest.version else {
+                    throw AppError(.updateStale, "downloaded v\(gotVersion), expected v\(manifest.version) from \(zipURL.absoluteString)")
+                }
                 guard let exe = newBundle?.executableURL,
                       FileManager.default.isExecutableFile(atPath: exe.path) else {
                     throw AppError(.updateDamagedApp, "no executable inside \(newApp.lastPathComponent)")
@@ -156,7 +161,7 @@ final class Updater {
                     helper.arguments = [script.path,
                                         String(ProcessInfo.processInfo.processIdentifier),
                                         newApp.path,
-                                        Bundle.main.bundleURL.path,
+                                        Self.installDestination.path,
                                         Bundle.main.bundleIdentifier ?? "com.jonpike.mixbar",
                                         Self.swapFailureMarker.path]
                     try helper.run()
@@ -172,6 +177,17 @@ final class Updater {
     }
 
     // MARK: - Helpers
+
+    /// Where the update goes: the running app's own location, except when macOS
+    /// runs it from a read-only App Translocation copy (opened straight from a
+    /// download), which can't be replaced. Then it goes to ~/Applications.
+    static var installDestination: URL {
+        let here = Bundle.main.bundleURL
+        guard here.path.contains("/AppTranslocation/") else { return here }
+        return FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent("Applications", isDirectory: true)
+            .appendingPathComponent(here.lastPathComponent)
+    }
 
     private static func read(_ url: URL) throws -> Data {
         if url.isFileURL {
@@ -236,7 +252,11 @@ final class Updater {
     fail() { mkdir -p "$(dirname "$MARKER")"; printf '%s|%s' "$1" "$2" > "$MARKER"; }
     for _ in $(seq 1 150); do kill -0 "$PID" 2>/dev/null || break; sleep 0.2; done
     rm -rf "$DEST.old"
-    if ! mv "$DEST" "$DEST.old" 2>/dev/null; then
+    mkdir -p "$(dirname "$DEST")"
+    if [ ! -e "$DEST" ]; then
+        # Nothing installed there yet (the old copy ran from App Translocation).
+        /usr/bin/ditto --norsrc "$NEW" "$DEST" 2>/dev/null || fail "MB-112" "couldn't copy the new version into $DEST"
+    elif ! mv "$DEST" "$DEST.old" 2>/dev/null; then
         fail "MB-112" "couldn't move $DEST aside to make room for the new version"
     elif ! /usr/bin/ditto --norsrc "$NEW" "$DEST" 2>/dev/null; then
         rm -rf "$DEST"

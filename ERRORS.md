@@ -36,6 +36,7 @@ Where errors show up:
 | MB-110 | The downloaded update is damaged. | Download the latest version from GitHub instead. |
 | MB-111 | Couldn't start installing the update. | Make sure MixBar is in ~/Applications and that the folder isn't locked, then try again. |
 | MB-112 | Installing the update failed, so the previous version was kept. | Make sure MixBar is in ~/Applications and that the folder isn't locked, then try again. |
+| MB-113 | The download was an older version than the update announced, so nothing was installed. | GitHub was still serving a cached copy. Wait five minutes and choose Check for Updates again. |
 
 ## Talking to TotalMix (2xx)
 
