@@ -59,7 +59,7 @@ and launches it. Grant Accessibility when asked.
 - `./test.sh` — protocol tests against a fake TotalMix
   (`Tests/fake_totalmix.py`). `./test.sh --snapshot <dir>` renders the popover
   to PNGs.
-- `UPDATE_NOTES="…" ./release.sh` — universal build, writes `updates/MixBar.zip`
+- `UPDATE_NOTES="…" ./release.sh` — Apple silicon build, writes `updates/MixBar.zip`
   and `updates/latest.json`; commit and push `updates/` to ship.
 
 ## How it works
